@@ -29,6 +29,26 @@ class Config:
     horizon: int = 8  # Jan–Aug 2025
     model_id: str = "amazon/chronos-t5-tiny"
 
+def load_config(config_path=None) -> 'Config':
+    """Build Config from config.yaml, falling back to dataclass defaults."""
+    if config_path is None:
+        config_path = Path(__file__).parent / 'config.yaml'
+    if not config_path.exists():
+        return Config()
+    with open(config_path) as _f:
+        import yaml as _yaml
+        raw = _yaml.safe_load(_f) or {}
+    _d = raw.get('data', {})
+    _m = raw.get('model', {})
+    _o = raw.get('output', {})
+    return Config(
+        csv_path=_d.get('input_file', '2001-2025 Net_generation_United_States_all_sectors_monthly.csv'),
+        freq=_d.get('freq', 'MS'),
+        horizon=_m.get('horizon', 8),
+        model_id=_m.get('model_id', 'amazon/chronos-t5-tiny'),
+    )
+
+
 
 def load_series(cfg: Config) -> pd.Series:
     p = Path(cfg.csv_path)
@@ -40,7 +60,7 @@ def load_series(cfg: Config) -> pd.Series:
 
 
 def main():
-    cfg = Config()
+    cfg = load_config()
     y = load_series(cfg)
 
     end_2024 = pd.Timestamp("2024-12-01")
@@ -64,10 +84,7 @@ def main():
     out = pipe.predict(context, prediction_length=cfg.horizon)
     out_np = np.asarray(out)
     # If multiple samples were returned, average across samples
-    if out_np.size % cfg.horizon == 0:
-        out_np = out_np.reshape(-1, cfg.horizon).mean(axis=0)
-    else:
-        out_np = out_np.ravel()[: cfg.horizon]
+    out_np = np.where(out_np.size % cfg.horizon == 0, out_np.reshape(-1, cfg.horizon).mean(axis=0), out_np.ravel()[:cfg.horizon])
     dates = pd.period_range("2025-01", "2025-08", freq="M").to_timestamp()
     fc = pd.Series(out_np, index=dates)
 

@@ -1,0 +1,15 @@
+data:
+  seed: 42
+  freq: MS
+  input_file: 2001-2025 Net_generation_United_States_all_sectors_monthly.csv
+model:
+  horizon: 8
+  model_id: amazon/chronos-t5-tiny
+output:
+  figures_dir: images
+  figure_format: png
+  figure_dpi: 100
+  font_family: serif
+  figsize:
+  - 10
+  - 5
