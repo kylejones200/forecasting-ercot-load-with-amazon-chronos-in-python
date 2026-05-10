@@ -1,56 +1,39 @@
+---
+author: "Kyle Jones"
+date_published: "March 14, 2025"
+date_exported_from_medium: "November 10, 2025"
+canonical_link: "https://medium.com/@kyle-t-jones/forecasting-ercot-load-with-amazon-chronos-in-python-cf8be7a81a75"
+---
+
 # Forecasting ERCOT Load with Amazon Chronos in Python
 
-Amazon Chronos is a time series LLM. We will use it to predict energy
-demand in the ERCOT (Electric Reliability Council of Texas) power...
+Amazon Chronos is a time series LLM. We will use it to predict energy demand in the ERCOT (Electric Reliability Council of Texas) power...
 
-::::::::### Forecasting ERCOT Load with Amazon Chronos in Python 
+### Forecasting ERCOT Load with Amazon Chronos in Python 
 
-Amazon Chronos is a time series LLM. We will use it to predict energy
-demand in the ERCOT (Electric Reliability Council of Texas) power grid.
-We'll walk through the process, including data preprocessing, training a
-model, and evaluating its performance.
+Amazon Chronos is a time series LLM. We will use it to predict energy demand in the ERCOT (Electric Reliability Council of Texas) power grid. We'll walk through the process, including data preprocessing, training a model, and evaluating its performance.
 
-Amazon Chronos is a family of pretrained time series forecasting models
-based on language model architectures. These models transform time
-series data into sequences of tokens using scaling and quantization.
+Amazon Chronos is a family of pretrained time series forecasting models based on language model architectures. These models transform time series data into sequences of tokens using scaling and quantization.
 
-Chronos models have been trained on a corpus of publicly available time
-series data, as well as synthetic data generated using Gaussian
-processes, allowing them to generalize well across a wide range of time
-series forecasting tasks.
+Chronos models have been trained on a corpus of publicly available time series data, as well as synthetic data generated using Gaussian processes, allowing them to generalize well across a wide range of time series forecasting tasks.
 
-The models are based on the T5 architecture, with a few modifications.
-The main difference is in the vocabulary size: Chronos-T5 models use
-4096 different tokens, compared to the 32128 tokens used by the original
-T5 models. This results in fewer parameters, making the models more
-efficient for time series tasks.
+The models are based on the T5 architecture, with a few modifications. The main difference is in the vocabulary size: Chronos-T5 models use 4096 different tokens, compared to the 32128 tokens used by the original T5 models. This results in fewer parameters, making the models more efficient for time series tasks.
 
-For a detailed explanation of Chronos models, training data, procedures,
-and experimental results, refer to the paper *Chronos: Learning the
-Language of Time Series*.
+For a detailed explanation of Chronos models, training data, procedures, and experimental results, refer to the paper *Chronos: Learning the Language of Time Series*.
 
 
 <figcaption>Image from Amazon Chronos</figcaption>
 
 
-The target time series is scaled and quantized into a sequence of
-tokens.
+The target time series is scaled and quantized into a sequence of tokens.
 
-These tokens are then fed into a language model, which may be an
-encoder-decoder or a decoder-only model. The model is trained using
-cross-entropy loss.
+These tokens are then fed into a language model, which may be an encoder-decoder or a decoder-only model. The model is trained using cross-entropy loss.
 
-During inference, the model autoregressively samples tokens and maps
-them back to numerical values. Multiple trajectories are sampled to
-create a predictive distribution, allowing for probabilistic
-forecasting.
+During inference, the model autoregressively samples tokens and maps them back to numerical values. Multiple trajectories are sampled to create a predictive distribution, allowing for probabilistic forecasting.
 
-We begin by loading historical ERCOT load data, which provides the power
-consumption (load) over time. The data is stored in a CSV file, where
-each record corresponds to a timestamp and the corresponding load value.
+We begin by loading historical ERCOT load data, which provides the power consumption (load) over time. The data is stored in a CSV file, where each record corresponds to a timestamp and the corresponding load value.
 
-Chronos is not available through pypi. To install it use:
-`pip install git+https://github.com/amazon-science/chronos-forecasting.git`
+Chronos is not available through pypi. To install it use: `pip install git+https://github.com/amazon-science/chronos-forecasting.git`
 
 ```python
 import matplotlib.pyplot as plt
@@ -66,15 +49,9 @@ df = pd.read_csv("ercot_load_data.csv")
 context = torch.tensor(df["values"].values)
 ```
 
-In this code, we load the data into a DataFrame, and we focus on the
-`values` column which contains the load
-data. We then convert the values into a PyTorch tensor, which is the
-format required by the Chronos model.
+In this code, we load the data into a DataFrame, and we focus on the `values` column which contains the load data. We then convert the values into a PyTorch tensor, which is the format required by the Chronos model.
 
-Since time series data has a temporal structure, it is important to
-split it while preserving this structure. We use TimeSeriesSplit from
-`sklearn` to perform a split that keeps
-the chronological order intact.
+Since time series data has a temporal structure, it is important to split it while preserving this structure. We use TimeSeriesSplit from `sklearn` to perform a split that keeps the chronological order intact.
 
 ``` 
 # Define prediction length
@@ -88,17 +65,9 @@ for train_index, test_index in tscv.split(df):
 train_context = torch.tensor(train["values"].values)
 ```
 
-Here, we define the `prediction_length`
-as 96, meaning that our model will forecast the next 96 time steps
-because the observations are every 15 mins (so 96 observations a day).
-Chronos will warn you that the model is not optimized for such a long
-prediction window.
+Here, we define the `prediction_length` as 96, meaning that our model will forecast the next 96 time steps because the observations are every 15 mins (so 96 observations a day). Chronos will warn you that the model is not optimized for such a long prediction window.
 
-Once the data is prepared, we load a pre-trained forecasting model from
-Amazon Chronos. This model is based on T5, a transformer-based
-architecture, and is ready for fine-tuning on time series data. Chronos
-does better with gpus and cuda. But I was able to run it with my laptop
-and Google Colab using cpus just fine.
+Once the data is prepared, we load a pre-trained forecasting model from Amazon Chronos. This model is based on T5, a transformer-based architecture, and is ready for fine-tuning on time series data. Chronos does better with gpus and cuda. But I was able to run it with my laptop and Google Colab using cpus just fine.
 
 ``` 
 # Load Chronos pipeline
@@ -112,14 +81,9 @@ pipeline = ChronosPipeline.from_pretrained(
 forecast = pipeline.predict(train_context, prediction_length)  
 ```
 
-We use `ChronosPipeline.from_pretrained()` to load a pre-trained T5 model tailored for time series
-forecasting. The `predict` method
-generates forecasts for the next `prediction_length` steps based on the training context.
+We use `ChronosPipeline.from_pretrained()` to load a pre-trained T5 model tailored for time series forecasting. The `predict` method generates forecasts for the next `prediction_length` steps based on the training context.
 
-To evaluate the model's performance, we calculate the Mean Absolute
-Percentage Error (MAPE), which is a common metric for forecasting
-accuracy. We compare the predicted values (the median forecast) against
-the true values in the test set.
+To evaluate the model's performance, we calculate the Mean Absolute Percentage Error (MAPE), which is a common metric for forecasting accuracy. We compare the predicted values (the median forecast) against the true values in the test set.
 
 ``` 
 # Get forecast statistics
@@ -135,16 +99,9 @@ print(f"MAPE: {mape:.2f}%")
 MAPE: 1.27%
 ```
 
-The forecast output is an array of predicted values, from which we
-extract the 10th percentile (`low`), 50th
-percentile (`median`), and 90th
-percentile (`high`) to represent the
-range of uncertainty in the forecast. We then compute the MAPE, which
-gives us an idea of how close our predictions are to the true values,
-expressed as a percentage.
+The forecast output is an array of predicted values, from which we extract the 10th percentile (`low`), 50th percentile (`median`), and 90th percentile (`high`) to represent the range of uncertainty in the forecast. We then compute the MAPE, which gives us an idea of how close our predictions are to the true values, expressed as a percentage.
 
-Finally, we visualize the forecasted values, historical data, and true
-values using Matplotlib.
+Finally, we visualize the forecasted values, historical data, and true values using Matplotlib.
 
 ``` 
 # Plot
@@ -162,17 +119,10 @@ plt.show()
 ```
 
 
-<figcaption>Chronos was able to model the fluctuations in this load
-very well.</figcaption>
+<figcaption>Chronos was able to model the fluctuations in this load very well.</figcaption>
 
 
-Amazon Chronos did a great job forecasting this real-world dataset. The
-key difference between Chronos and traditional time series is that the
-model is pre-trained. We are not creating the model. In this pipeline,
-our task is inference only. That simplifies a lot of things but also
-gives up a lot of control.
-::::I did more experimenting with this using a larger dataset, Ercot hourly
-load from 2018--2025 (Feb). It did ok.
+Amazon Chronos did a great job forecasting this real-world dataset. The key difference between Chronos and traditional time series is that the model is pre-trained. We are not creating the model. In this pipeline, our task is inference only. That simplifies a lot of things but also gives up a lot of control. I did more experimenting with this using a larger dataset, Ercot hourly load from 2018--2025 (Feb). It did ok.
 
 
 ```python
@@ -241,9 +191,7 @@ plt.legend(frameon=False, fontsize=10)
 plt.savefig("ercot_forecast_vs_actual_with_dates.png")
 plt.show()
 ```
-::::I revisited Chronos with a different dataset. Below is the code using
-data about [US energy
-generation.](https://www.eia.gov/electricity/data/browser/)
+I revisited Chronos with a different dataset. Below is the code using data about [US energy generation.](https://www.eia.gov/electricity/data/browser/)
 
 ```python
 import numpy as np
@@ -339,12 +287,3 @@ def main():
 if __name__ == '__main__':
     main()
 ```
-
-
-::::::::::::::::By [Kyle Jones](https://medium.com/@kyle-t-jones) on
-[March 14, 2025](https://medium.com/p/cf8be7a81a75).
-
-[Canonical
-link](https://medium.com/@kyle-t-jones/forecasting-ercot-load-with-amazon-chronos-in-python-cf8be7a81a75)
-
-Exported from [Medium](https://medium.com) on November 10, 2025.
