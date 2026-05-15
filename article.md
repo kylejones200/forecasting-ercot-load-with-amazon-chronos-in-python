@@ -93,9 +93,8 @@ low, median, high = np.quantile(forecast[0].numpy(), [0.1, 0.5, 0.9], axis=0)
 true_values = test["values"].values
 mape = np.mean(np.abs((true_values - median) / true_values)) * 100
 print(f"MAPE: {mape:.2f}%")
-```
 
-``` 
+
 MAPE: 1.27%
 ```
 
