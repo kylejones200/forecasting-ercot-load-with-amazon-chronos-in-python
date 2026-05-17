@@ -186,7 +186,6 @@ def main():
 
     # Suppress ARIMA warnings
     warnings.filterwarnings("ignore", message="Non-invertible starting MA parameters found")
-    warnings.filterwarnings("ignore", category=UserWarning)
 
     # Ensure Data Stationarity (Differencing)
     y_reg_train_series = y_reg_train_series.diff().dropna()
@@ -251,7 +250,6 @@ def main():
 
     # Suppress ARIMA warnings
     warnings.filterwarnings("ignore", message="Non-invertible starting MA parameters found")
-    warnings.filterwarnings("ignore", category=UserWarning)
 
     # Simulated Time Series Data
     np.random.seed(42)
@@ -358,7 +356,7 @@ def main():
                 best_aic = results_arima.aic
                 best_pdq = param
                 best_model = results_arima
-        except:
+        except Exception:
             continue
 
     if best_model is not None:
@@ -409,7 +407,6 @@ def main():
 
     # Suppress warnings
     warnings.filterwarnings("ignore", message="Non-invertible starting MA parameters found")
-    warnings.filterwarnings("ignore", category=UserWarning)
 
     # Load the ERCOT data
     df = pd.read_csv("ercot_load_data.csv")
@@ -520,7 +517,7 @@ def main():
                 best_aic = results_arima.aic
                 best_pdq = param
                 best_model = results_arima
-        except:
+        except Exception:
             continue
 
     if best_model is not None:
@@ -599,7 +596,6 @@ def main():
 
     # Suppress warnings
     warnings.filterwarnings("ignore", message="Non-invertible starting MA parameters found")
-    warnings.filterwarnings("ignore", category=UserWarning)
 
     # Load the ERCOT data
     df = pd.read_csv("ercot_load_data.csv")
@@ -735,7 +731,7 @@ def main():
                 best_aic = results_arima.aic
                 best_pdq = param
                 best_model = results_arima
-        except:
+        except Exception:
             continue
 
     if best_model is not None:
