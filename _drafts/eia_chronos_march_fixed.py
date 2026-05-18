@@ -55,14 +55,11 @@ def load_series(cfg: Config) -> pd.Series:
 def main(plot: bool = False):
     cfg = load_config()
     y = load_series(cfg)
-
     end_2024 = pd.Timestamp("2024-12-01")
     jan_2025 = pd.Timestamp("2025-01-01")
     aug_2025 = pd.Timestamp("2025-08-01")
-
     y_train = y.loc[:end_2024]
     y_act = y.loc[jan_2025:aug_2025]
-
     # Try ChronosPipeline (chronos-forecasting exposes the same name)
     try:
         from chronos import ChronosPipeline
@@ -84,11 +81,9 @@ def main(plot: bool = False):
     )
     dates = pd.period_range("2025-01", "2025-08", freq="M").to_timestamp()
     fc = pd.Series(out_np, index=dates)
-
     # Greyscale Tufte-style plot
     start_2024 = pd.Timestamp("2024-01-01")
     y_hist = y.loc[start_2024:end_2024]
-
     if plot:
         fig, ax = plt.subplots(figsize=(10, 5))
         ax.plot(y_hist.index, y_hist.values, color="#888888", lw=1.5)
@@ -96,7 +91,6 @@ def main(plot: bool = False):
         if len(y_act):
             ax.plot(y_act.index, y_act.values, color="#444444", lw=1.8)
         ax.plot(fc.index, fc.values, color="#000000", lw=2.0)
-
         from matplotlib.ticker import MaxNLocator, StrMethodFormatter
 
         ax.yaxis.set_major_locator(MaxNLocator(4))
@@ -105,7 +99,6 @@ def main(plot: bool = False):
         ax.spines["right"].set_visible(False)
         ax.grid(False)
         ax.set_xlabel("")
-
         if len(y_hist):
             ax.annotate(
                 "History (2024)",
@@ -138,7 +131,6 @@ def main(plot: bool = False):
             ha="left",
             color="#000000",
         )
-
         ax.set_title("EIA Net Generation — Chronos forecast Jan–Aug 2025")
         signalplot.save("eia_chronos_last_fold.png")
 
