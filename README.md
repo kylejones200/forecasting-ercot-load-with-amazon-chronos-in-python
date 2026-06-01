@@ -11,14 +11,7 @@ Amazon Chronos is a time series LLM. We will use it to predict energy demand in 
 
 Amazon Chronos is a family of pretrained time series forecasting models based on language model architectures. These models transform time series data into sequences of tokens using scaling and quantization.
 
-## About
 
-Place the code for this article in this repository.
-The original article export is saved as `article.md`.
-
-## Files
-
-Add your `.ipynb`, `.py`, `.yaml`, `.js`, `.ts`, or other project files here.
 
 ## Disclaimer
 
